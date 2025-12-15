@@ -1,0 +1,20 @@
+<?php
+
+use App\Http\Controllers\CartaoController;
+use App\Http\Controllers\DespesaController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use App\Models\Cartao;
+use App\Models\Despesa;
+
+Route::post('/login', [UserController::class, 'login']);
+Route::get('send-mail',[EmailController::class,'despesaCriada']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+#Cria as rotas todas automaticamente
+    Route::apiResource('/users', UserController::class);
+    Route::apiResource('/cartoes', CartaoController::class);
+    Route::apiResource('/despesas', DespesaController::class)->only(['store', 'show', 'index', 'destroy']);
+});
