@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Nette\Schema\ValidationException;
 
@@ -23,11 +24,17 @@ class UserService
         }
     }
 
-    public function atualizarUser(string $id, array $userAtualizado): User
+    public function atualizarUser(string $id, array $userAtualizado, User $userAutenticado): User
     {
 
         try{
             $userEncontrado = User::findOrFail($id);
+            if(!Gate::allows('update', $userEncontrado)){
+                throw new \Illuminate\Auth\Access\AuthorizationException('Você não é autorizado a atualizar este user.', 403);
+            }
+            if(!$userAutenticado->is_admin && isset($userAtualizado['is_admin'])){
+                unset($userAtualizado['is_admin']);
+            }
             if(isset($userAtualizado['password'])) {
                 $userAtualizado['password'] = Hash::make($userAtualizado['password']);
             }

@@ -22,7 +22,7 @@ class CartaoService
         }
     }
 
-    public function atualizarCartao(string $id, array $cartaoAtualizado, User $user): Cartao
+    public function atualizarCartao(string $id, array $cartaoAtualizado): Cartao
     {
         try {
             $cartaoEncontrado = Cartao::findOrFail($id);

@@ -9,8 +9,6 @@ use App\Models\Cartao;
 use App\Models\Despesa;
 
 Route::post('/login', [UserController::class, 'login']);
-Route::get('send-mail',[EmailController::class,'despesaCriada']);
-
 
 Route::middleware('auth:sanctum')->group(function () {
 #Cria as rotas todas automaticamente

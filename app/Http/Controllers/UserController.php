@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -32,10 +34,10 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $userRequest)
     {
         try {
-            $user = $this->userService->cadastrarUser($request->all());
+            $user = $this->userService->cadastrarUser($userRequest->validate());
             return response()->json($user, 201);
         }catch(\Exception $e){
             return response()->json([
@@ -63,16 +65,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, string $id)
     {
         try {
             $userAAtualizar = User::findOrFail($id);
             Gate::authorize('update', $userAAtualizar);
-            if(!Auth::user()->is_admin){
-                // Remove o campo is_admin do request para usuários comuns.
-                $request->offsetUnset('is_admin');
-            }
-            $user = $this->userService->atualizarUser($id, $request->all());
+            $userAutenticado = Auth::user();
+            $user = $this->userService->atualizarUser($id, $request->validated(), $userAutenticado);
             return response()->json($user, 200);
         }catch(ModelNotFoundException $e) {
             return response()->json([

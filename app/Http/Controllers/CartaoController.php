@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCartaoRequest;
+use App\Http\Requests\UpdateCartaoRequest;
 use App\Models\Cartao;
 use App\Services\CartaoService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -31,11 +33,12 @@ class CartaoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCartaoRequest $request)
     {
         $user = Auth::user();
+        Gate::Authorize('create', [Cartao::class,$request->user_id]);
         try {
-            $cartao = $this->cartaoService->cadastrarCartao($request->all(), $user);
+            $cartao = $this->cartaoService->cadastrarCartao($request->validated(), $user);
             return response()->json($cartao, 201);
         }catch(ModelNotFoundException $e){
             return response()->json([
@@ -61,13 +64,12 @@ class CartaoController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateCartaoRequest $request, string $id)
     {
-        $user = Auth::user();
         try {
             $cartao = Cartao::findOrFail($id);
             Gate::authorize('update', $cartao);
-            $cartaoAtualizado = $this->cartaoService->atualizarCartao($id, $request->all(), $user);
+            $cartaoAtualizado = $this->cartaoService->atualizarCartao($id, $request->validated());
             return response()->json($cartaoAtualizado, 200);
         }catch(ModelNotFoundException $e){
             return response()->json([
