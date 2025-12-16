@@ -12,9 +12,9 @@ class DespesaPolicy
     * Regra que roda antes de todas as outras.
     * Permite que administradores passem sem mais verificações.
     */
-    public function before(User $user, string $ability): ?bool
+    public function before(User $user, string $ability)
     {
-        if ($user->is_admin ?? false) {
+        if($user->is_admin){
             return true;
         }
         return null;

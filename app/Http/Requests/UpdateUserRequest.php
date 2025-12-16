@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,7 +13,11 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $userAAtualizar = $this->route('user');
+        if(!$userAAtualizar instanceof User){
+            $userAAtualizar = User::findOrFail($userAAtualizar);
+        }
+        return $this->user()->can('update', $userAAtualizar);
     }
 
     /**
@@ -22,12 +27,18 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('user');
+        $user = $this->route('user');
+        $userId = $user instanceof User ? $user->id : (int)$user;
         return [
             'name' => 'sometimes|string|min:3|max:255',
             'email' => ['sometimes','string','email','max:255',Rule::unique('users', 'email')->ignore($userId)],
             'password' => 'sometimes|string|min:5|max:255',
             'is_admin' => 'sometimes|boolean',
         ];
+    }
+
+    public function returnDados(): array
+    {
+        return $this->validated();
     }
 }

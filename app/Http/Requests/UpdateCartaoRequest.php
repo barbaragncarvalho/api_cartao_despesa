@@ -14,7 +14,11 @@ class UpdateCartaoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $cartaoAAtualizar = $this->route('cartao');
+        if(!$cartaoAAtualizar instanceof Cartao){
+            $cartaoAAtualizar = Cartao::findOrFail($cartaoAAtualizar);
+        }
+        return $this->user()->can('update', $cartaoAAtualizar);
     }
 
     /**
@@ -24,14 +28,20 @@ class UpdateCartaoRequest extends FormRequest
      */
     public function rules(): array
     {
-        $cartaoId = $this->route('cartao');
+        $cartao = $this->route('cartao');
+        $cartaoId = $cartao instanceof Cartao? $cartao->id : (int)$cartao;
         return [
-            'number' => ['sometimes','digits_between: 16,19',Rule::unique('cartaos','number')->ignore($cartaoId)],
-            'data_validade' => 'sometimes|date_format:m/Y',
+            'number' => ['sometimes','digits_between:16,19',Rule::unique('cartaos','number')->ignore($cartaoId)],
+            'data_validade' => ['sometimes','date_format:m/y'],
             'cvv' => 'sometimes|size:3',
-            'saldo' => 'sometimes|numeric|min:0',
-            'status' => 'sometimes|string|in:ATIVO,BLOQUEADO,CANCELADO',
-            'user_id' => 'sometimes|int|exists:users,id',
+            'saldo' => ['sometimes','numeric', 'min:0'],
+            'status' => ['sometimes','string','in:ATIVO,BLOQUEADO,CANCELADO'],
+            'user_id' => ['sometimes','int','exists:users,id'],
         ];
+    }
+
+    public function returnDados(): array
+    {
+        return $this->validated();
     }
 }

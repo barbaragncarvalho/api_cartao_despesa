@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Cartao;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class StoreCartaoRequest extends FormRequest
@@ -12,7 +14,7 @@ class StoreCartaoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Cartao::class);
     }
 
     /**
@@ -22,22 +24,30 @@ class StoreCartaoRequest extends FormRequest
      */
     public function rules(): array
     {
+        $cartao = $this->route('cartao');
+        $idCartao = $cartao instanceof Cartao? $cartao->id:$cartao;
         return [
-            'number' => 'required','digits_between: 16,19',
-            'data_validade' => 'required|date_format:d/m/Y',
+            'number' => ['required','digits_between:16,19', Rule::unique('cartaos','number')->ignore($idCartao)],
+            'data_validade' => 'required|date_format:m/y',
             'cvv' => 'required|size:3',
             'saldo' => 'required|numeric|min:0',
             'status' => 'required|string|in:ATIVO,BLOQUEADO,CANCELADO',
-            'user_id' => 'required|int|user.exists:users,id',
+            'user_id' => ['required', 'int', 'exists:users,id'],
         ];
     }
 
     public function messages():array
     {
         return [
-            'number.min' => 'O número do cartão deve ter ao menos 16 dígitos.',
+            'number.digits_betweer' => 'O número do cartão deve ter entre 16 dígitos e 19.',
             'cvv.size' => 'O CVV deve ter 3 dígitos.',
-            'saldo.min' => 'O saldo do cartão não deve ser menor que 0.'
+            'saldo.min' => 'O saldo do cartão não deve ser menor que 0.',
+            'data_validade.date_format' => 'A data de validade deve ser no formato mm/yy.'
         ];
+    }
+
+    public function returnDados(): array
+    {
+        return $this->validated();
     }
 }

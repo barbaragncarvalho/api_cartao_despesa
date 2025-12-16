@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
@@ -11,7 +12,7 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', User::class);
     }
 
     /**
@@ -35,5 +36,10 @@ class StoreUserRequest extends FormRequest
             'email.unique' => 'Este e-mail já está sendo usado.',
             'password.min' => 'A senha deve ter ao menos 5 caracteres.'
         ];
+    }
+
+    public function returnados(): array
+    {
+        return $this->validated();
     }
 }

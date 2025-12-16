@@ -45,8 +45,9 @@ class CartaoPolicy
         return false;
     }
 
-    public function before(User $user, string $ability){
-        if($user->is_admin ?? false){
+    public function before(User $user, string $ability)
+    {
+        if($user->is_admin){
             return true;
         }
         return null;

@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Models\Cartao;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class CartaoService
 {
-    public function cadastrarCartao(array $dados, User $user): Cartao
+    public function cadastrarCartao(array $dados): Cartao
     {
-        if(!($user->is_admin ?? false)){
+        $user = Auth::user();
+        if(!$user->is_admin){
             $dados['user_id'] = $user->id;
         }
         try {

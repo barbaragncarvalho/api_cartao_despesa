@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class CartaoController extends Controller
 {
@@ -35,10 +36,9 @@ class CartaoController extends Controller
      */
     public function store(StoreCartaoRequest $request)
     {
-        $user = Auth::user();
-        Gate::Authorize('create', [Cartao::class,$request->user_id]);
         try {
-            $cartao = $this->cartaoService->cadastrarCartao($request->validated(), $user);
+            $cartao = $this->cartaoService->cadastrarCartao($request->returnDados());
+            //Log::debug($cartao);
             return response()->json($cartao, 201);
         }catch(ModelNotFoundException $e){
             return response()->json([
@@ -67,9 +67,7 @@ class CartaoController extends Controller
     public function update(UpdateCartaoRequest $request, string $id)
     {
         try {
-            $cartao = Cartao::findOrFail($id);
-            Gate::authorize('update', $cartao);
-            $cartaoAtualizado = $this->cartaoService->atualizarCartao($id, $request->validated());
+            $cartaoAtualizado = $this->cartaoService->atualizarCartao($id, $request->returnDados());
             return response()->json($cartaoAtualizado, 200);
         }catch(ModelNotFoundException $e){
             return response()->json([

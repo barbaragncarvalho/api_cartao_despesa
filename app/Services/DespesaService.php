@@ -13,11 +13,14 @@ use function PHPUnit\Framework\throwException;
 
 class DespesaService
 {
-    public function cadastrarDespesa(array $dados, User $user){
-
+    public function cadastrarDespesa(array $dados){
+        $user = Auth::user();
         return DB::transaction(function () use ($dados, $user) {
-            $cartao = Cartao::where('id', $dados['cartao_id'])
-                            ->where('user_id',$user->id)->first();
+            $consulta = Cartao::where('id', $dados['cartao_id']);
+            if(!$user->is_admin){
+                $consulta->where('user_id',$user->id);
+            }
+            $cartao = $consulta->first();
             if (!$cartao) {
                 throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Cartão inválido ou não encontrado.');
             }

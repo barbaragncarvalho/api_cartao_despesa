@@ -7,6 +7,13 @@ use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
+    public function before(User $user, string $ability)
+    {
+        if($user->is_admin){
+            return true;
+        }
+        return null;
+    }
     /**
      * Determine whether the user can view any models.
      */
@@ -28,7 +35,7 @@ class UserPolicy
      */
     public function create(User $userLogado): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -36,7 +43,7 @@ class UserPolicy
      */
     public function update(User $userLogado, User $model): bool
     {
-        return $userLogado->is_admin || $userLogado->id === $model->id;
+        return $userLogado->id === $model->id;
     }
 
     /**

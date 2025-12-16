@@ -37,7 +37,8 @@ class UserController extends Controller
     public function store(StoreUserRequest $userRequest)
     {
         try {
-            $user = $this->userService->cadastrarUser($userRequest->validate());
+            //$userRequest->authorize();
+            $user = $this->userService->cadastrarUser($userRequest->returndados());
             return response()->json($user, 201);
         }catch(\Exception $e){
             return response()->json([
@@ -68,9 +69,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, string $id)
     {
         try {
-            $userAAtualizar = User::findOrFail($id);
-            Gate::authorize('update', $userAAtualizar);
-            $user = $this->userService->atualizarUser($id, $request->validated());
+            $user = $this->userService->atualizarUser($id, $request->returnDados());
             return response()->json($user, 200);
         }catch(ModelNotFoundException $e) {
             return response()->json([

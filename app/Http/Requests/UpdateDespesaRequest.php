@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Despesa;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDespesaRequest extends FormRequest
@@ -11,7 +12,11 @@ class UpdateDespesaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $despesaAAtualizar = $this->route('despesa');
+        if(!$despesaAAtualizar instanceof Despesa){
+            $despesaAAtualizar = Despesa::findOrFail($despesaAAtualizar);
+        }
+        return $this->user()->can('update', $despesaAAtualizar);
     }
 
     /**
@@ -26,5 +31,10 @@ class UpdateDespesaRequest extends FormRequest
             'valor' => 'sometimes|numeric|min:0',
             'cartao_id' => 'sometimes|int|exists:cartaos,id'
         ];
+    }
+
+    public function returnDados(): array
+    {
+        return $this->validated();
     }
 }

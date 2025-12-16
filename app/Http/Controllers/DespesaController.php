@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Events\EventoMail;
+use App\Http\Requests\StoreDespesaRequest;
 use App\Mail\DespesaCriada;
 use App\Models\Despesa;
 use App\Models\User;
@@ -30,14 +31,13 @@ class DespesaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, DespesaService $despesaService)
+    public function store(StoreDespesaRequest $request, DespesaService $despesaService)
     {
         try {
-            $user = Auth::user();
-            $despesa = $despesaService->cadastrarDespesa($request->all(), $user);
+            $despesa = $despesaService->cadastrarDespesa($request->returnDados());
 
             $adminsEmails = User::where('is_admin', true)->pluck('email')->toArray();
-            $destinatarios = array_merge([$user->email], $adminsEmails);
+            $destinatarios = array_merge([$request->user()->email], $adminsEmails);
             $despesaComCartao = $despesa->load('cartao');
             Mail::to($destinatarios)->send(new DespesaCriada($despesaComCartao));
             return response()->json($despesa, 201);
