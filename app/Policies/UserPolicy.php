@@ -26,7 +26,7 @@ class UserPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $userLogado): bool
     {
         return false;
     }
@@ -34,23 +34,23 @@ class UserPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, User $model): bool
+    public function update(User $userLogado, User $model): bool
     {
-        return ($user->is_admin ?? false) || $user->id === $model->id;
+        return $userLogado->is_admin || $userLogado->id === $model->id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, User $model): bool
+    public function delete(User $userLogado, User $userADeletar): bool
     {
-        return ($user->is_admin ?? false) && $user->id !== $model->id;
+        return $userLogado->is_admin && $userLogado->id !== $userADeletar->id;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, User $model): bool
+    public function restore(User $userLogado, User $model): bool
     {
         return false;
     }
@@ -58,7 +58,7 @@ class UserPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, User $model): bool
+    public function forceDelete(User $userLogado, User $model): bool
     {
         return false;
     }

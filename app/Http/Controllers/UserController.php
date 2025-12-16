@@ -70,8 +70,7 @@ class UserController extends Controller
         try {
             $userAAtualizar = User::findOrFail($id);
             Gate::authorize('update', $userAAtualizar);
-            $userAutenticado = Auth::user();
-            $user = $this->userService->atualizarUser($id, $request->validated(), $userAutenticado);
+            $user = $this->userService->atualizarUser($id, $request->validated());
             return response()->json($user, 200);
         }catch(ModelNotFoundException $e) {
             return response()->json([

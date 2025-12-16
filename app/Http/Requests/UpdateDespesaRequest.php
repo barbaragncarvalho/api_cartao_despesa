@@ -24,7 +24,7 @@ class UpdateDespesaRequest extends FormRequest
         return [
             'descricao' => 'sometimes|string',
             'valor' => 'sometimes|numeric|min:0',
-            'cartao' => 'sometimes|int|exists:cartaos,id'
+            'cartao_id' => 'sometimes|int|exists:cartaos,id'
         ];
     }
 }

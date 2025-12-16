@@ -24,7 +24,7 @@ class StoreDespesaRequest extends FormRequest
         return [
             'descricao' => 'required|string',
             'valor' => 'required|numeric|min:0',
-            'cartao' => 'required|int|exists:cartaos,id'
+            'cartao_id' => 'required|int|exists:cartaos,id'
         ];
     }
 }

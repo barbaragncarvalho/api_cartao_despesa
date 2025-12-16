@@ -51,11 +51,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function promoverParaAdmin(): void{
-        $this->isAdmin = true;
-        $this->save();
-    }
-
     public function cartoes()
     {
         return $this->hasMany(Cartao::class);
