@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Exceptions\CredenciaisInvalidasException;
+use App\Exceptions\UserNaoEncontradoException;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -25,11 +27,19 @@ class UserService
         }
     }
 
+    public function listarUmUser(string $id): User
+    {
+        $user = User::with('cartoes')->find($id);
+        if(!$user){
+            throw new UserNaoEncontradoException();
+        }
+        return $user;
+    }
+
     public function atualizarUser(string $id, array $userAtualizado): User
     {
-
         try{
-            $userEncontrado = User::findOrFail($id);
+            $userEncontrado = $this->listarUmUser($id);
             $userAutenticado = Auth::user();
             if(!$userAutenticado->is_admin && isset($userAtualizado['is_admin'])){
                 unset($userAtualizado['is_admin']);
@@ -47,11 +57,7 @@ class UserService
     public function removerUser(string $id): void
     {
         try{
-            $userRemovido = User::destroy($id);
-            if(!$userRemovido){
-                throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Usuário não encontrado para ser removido.");
-            }
-
+            User::destroy($id);
         }catch (\Exception $e){
             throw new \Exception("Falha ao remover usuário.");
         }
@@ -61,7 +67,7 @@ class UserService
     {
         $user = User::where('email', $dadosUser['email'])->first();
         if(!$user || !Hash::check($dadosUser['password'], $user->password)){
-            throw new ValidationException("Suas credenciais são inválidas!");
+            throw new CredenciaisInvalidasException();
         }
         return $user;
     }

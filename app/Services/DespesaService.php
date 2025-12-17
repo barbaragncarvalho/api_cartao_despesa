@@ -52,9 +52,9 @@ class DespesaService
     public function listarUmaDespesa(string $id): Despesa
     {
         $despesa = Despesa::find($id);
-       if(!$despesa){
-           throw new DespesaNaoEncontradaException();
-       }
+        if(!$despesa){
+            throw new DespesaNaoEncontradaException();
+        }
         return $despesa;
     }
 

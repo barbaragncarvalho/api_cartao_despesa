@@ -36,15 +36,8 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $userRequest)
     {
-        try {
-            //$userRequest->authorize();
-            $user = $this->userService->cadastrarUser($userRequest->returndados());
-            return response()->json($user, 201);
-        }catch(\Exception $e){
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
-        }
+        $user = $this->userService->cadastrarUser($userRequest->returndados());
+        return response()->json($user, 201);
     }
 
     /**
@@ -52,15 +45,10 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $user = User::with('cartoes')->findOrFail($id);
-            Gate::authorize('view', $user);
-            return response()->json($user, 200);
-        }catch(ModelNotFoundException $e){
-            return response()->json([
-                'message' => 'Usuário não encontrado.'
-            ], 404);
-        }
+        $user = $this->userService->listarUmUser($id);
+        Gate::authorize('view', $user);
+        return response()->json($user, 200);
+
     }
 
     /**
@@ -68,18 +56,8 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id)
     {
-        try {
-            $user = $this->userService->atualizarUser($id, $request->returnDados());
-            return response()->json($user, 200);
-        }catch(ModelNotFoundException $e) {
-            return response()->json([
-                'messaqe' => 'Usuário não encontrado.'
-            ], 404);
-        } catch(\Exception $e){
-            return response()->json([
-                'message' => 'Falha ao atualizar usuário.'
-            ], 400);
-        }
+        $user = $this->userService->atualizarUser($id, $request->returnDados());
+        return response()->json($user, 200);
     }
 
     /**
@@ -87,21 +65,10 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            $userADeletar = User::findOrFail($id);
-            Gate::authorize('delete', $userADeletar);
-            $this->userService->removerUser($id);
-            return response()->json(null, 204);
-        }catch(ModelNotFoundException $e){
-            return response()->json([
-                'message' => 'Usuário não encontrado.'
-            ], 404);
-        }
-        catch(\Exception $e){
-            return response()->json([
-                'message' => 'Falha ao remover usuário.'
-            ], 400);
-        }
+        $userADeletar = $this->userService->listarUmUser($id);
+        Gate::authorize('delete', $userADeletar);
+        $this->userService->removerUser($id);
+        return response()->json(null, 204);
     }
 
     public function login(Request $request)
@@ -110,8 +77,6 @@ class UserController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
-        try {
             $user = $this->userService->autenticarUser($request->only('email', 'password'));
             $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
@@ -119,14 +84,5 @@ class UserController extends Controller
                 'token_type' => 'Bearer',
                 'user' => $user,
             ]);
-        }catch (ValidationException $e){
-            return response()->json([
-                'message' => 'Suas credenciais são inválidas!'
-            ], 401);
-        }catch (\Exception $e){
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
-        }
     }
 }
