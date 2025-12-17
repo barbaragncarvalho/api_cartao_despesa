@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Events\EventoMail;
+use App\Exceptions\PermissaoNegadaDeAcessoException;
 use App\Http\Requests\StoreDespesaRequest;
 use App\Mail\DespesaCriada;
 use App\Models\Despesa;
@@ -14,17 +15,11 @@ use Illuminate\Support\Facades\Mail;
 
 class DespesaController extends Controller
 {
-    public function index()
+    public function index(DespesaService $despesaService)
     {
         $user = Auth::user();
         Gate::authorize('viewAny', Despesa::class);
-
-        if ($user->is_admin ?? false) {
-            $despesas = Despesa::all();
-        } else {
-            $cartaoIds = $user->cartoes->pluck('id');
-            $despesas = Despesa::whereIn('cartao_id', $cartaoIds)->get();
-        }
+        $despesas = $despesaService->listarDespesas($user);
         return response()->json($despesas, 200);
     }
 
@@ -33,56 +28,22 @@ class DespesaController extends Controller
      */
     public function store(StoreDespesaRequest $request, DespesaService $despesaService)
     {
-        try {
-            $despesa = $despesaService->cadastrarDespesa($request->returnDados());
-
-            $adminsEmails = User::where('is_admin', true)->pluck('email')->toArray();
-            $destinatarios = array_merge([$request->user()->email], $adminsEmails);
-            $despesaComCartao = $despesa->load('cartao');
-            Mail::to($destinatarios)->send(new DespesaCriada($despesaComCartao));
-            return response()->json($despesa, 201);
-        }catch(ModelNotFoundException $e){
-            return response()->json([
-                'message' => 'Cartão inválido ou não encontrado.'
-            ], 404);
-        }
-        catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()], 400);
-    }
+        $despesa = $despesaService->cadastrarDespesa($request->returnDados(), $request->user());
+        return response()->json($despesa, 201);
     }
 
-    public function show(string $id)
+    public function show(string $id, DespesaService $despesaService)
     {
-        try {
-            $despesa = Despesa::findOrFail($id);
-            Gate::authorize('view', $despesa);
-            return response()->json($despesa, 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Despesa não encontrada.'
-            ], 404);
-        }
+        $despesa = $despesaService->listarUmaDespesa($id);
+        Gate::authorize('view', $despesa);
+        return response()->json($despesa, 200);
     }
 
     public function destroy(string $id, DespesaService $despesaService)
     {
-        try {
-            $despesa = Despesa::findOrFail($id);
-            Gate::authorize('delete', $despesa);
-            $despesaService->removerDespesa($id);
-            return response()->json(null, 204);
-        }catch(ModelNotFoundException $e){
-            return response()->json([
-                'message' => 'Despesa não encontrada para ser removida.'
-            ], 404);
-        }catch(\Illuminate\Auth\Access\AuthorizationException $e){
-            return response()->json([
-                'message' => 'Você não tem permissão para remover despesa.'
-            ], 403);
-        }catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Falha ao remover despesa:'. $e->getMessage()
-            ], 400);
-        }
+        $despesa = $despesaService->listarUmaDespesa($id);
+        Gate::authorize('delete', $despesa);
+        $despesaService->removerDespesa($id);
+        return response()->json(null, 204);
     }
 }

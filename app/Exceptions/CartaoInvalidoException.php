@@ -8,6 +8,6 @@ class CartaoInvalidoException extends \Exception
 {
     public function render($request): JsonResponse
     {
-    return response()->json(['error'=>'Operação negada', 'message'=>'Cartão inválido ou não encontrado.'], 404);
+        return response()->json(['error'=>'Operação negada', 'message'=>'Cartão inválido ou não encontrado.'], 404);
     }
 }
