@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Exceptions\CartaoInvalidoException;
+use App\Exceptions\SaldoInsuficienteException;
 use App\Mail\DespesaCriada;
 use App\Models\Cartao;
 use App\Models\Despesa;
@@ -22,10 +24,10 @@ class DespesaService
             }
             $cartao = $consulta->first();
             if (!$cartao) {
-                throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Cartão inválido ou não encontrado.');
+                throw new CartaoInvalidoException();
             }
             if ($cartao->saldo < $dados['valor']) {
-                throw new \Exception('Saldo insuficiente no cartão.');
+                throw new SaldoInsuficienteException();
             }
             $despesa = Despesa::create($dados);
             $cartao->saldo -= $dados['valor'];
