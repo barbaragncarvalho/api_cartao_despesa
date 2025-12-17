@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCartaoRequest;
 use App\Http\Requests\UpdateCartaoRequest;
+use App\Http\Requests\ViewAllCartaoRequest;
 use App\Models\Cartao;
 use App\Services\CartaoService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,10 +20,10 @@ class CartaoController extends Controller
         $this->cartaoService = $cartaoService;
     }
 
-    public function index()
+    public function index(ViewAllCartaoRequest $request)
     {
-        Gate::authorize('viewAny', Cartao::class);
-        $cartoes = $this->cartaoService->listarCartoes();
+        $paginate = $request->getPaginate();
+        $cartoes = $this->cartaoService->listarCartoes($paginate);
         return response()->json($cartoes, 200);
     }
 

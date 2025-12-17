@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Events\EventoMail;
 use App\Exceptions\PermissaoNegadaDeAcessoException;
 use App\Http\Requests\StoreDespesaRequest;
+use App\Http\Requests\ViewAllDespesaRequest;
 use App\Mail\DespesaCriada;
 use App\Models\Despesa;
 use App\Models\User;
@@ -15,10 +16,10 @@ use Illuminate\Support\Facades\Mail;
 
 class DespesaController extends Controller
 {
-    public function index(DespesaService $despesaService)
+    public function index(ViewAllDespesaRequest $request, DespesaService $despesaService)
     {
-        Gate::authorize('viewAny', Despesa::class);
-        $despesas = $despesaService->listarDespesas();
+        $paginate = $request->getPaginate();
+        $despesas = $despesaService->listarDespesas($paginate);
         return response()->json($despesas, 200);
     }
 

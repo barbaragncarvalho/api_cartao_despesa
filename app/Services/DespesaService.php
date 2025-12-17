@@ -10,7 +10,7 @@ use App\Mail\DespesaCriada;
 use App\Models\Cartao;
 use App\Models\Despesa;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -18,13 +18,15 @@ use function PHPUnit\Framework\throwException;
 
 class DespesaService
 {
-    public function listarDespesas(): Collection
+    public function listarDespesas(int $paginate): Collection
     {
         $user = Auth::user();
         if ($user->is_admin) {
-            return Despesa::all();
+            $despesas = Despesa::paginate($paginate);
+            return $despesas->getCollection();
         }
-        return Despesa::whereIn('cartao_id',$user->cartoes->pluck('id'))->get();
+        $despesas = Despesa::whereIn('cartao_id',$user->cartoes->pluck('id'))->paginate($paginate);
+        return $despesas->getCollection();
     }
 
     public function cadastrarDespesa(array $dados, User $userLogado){

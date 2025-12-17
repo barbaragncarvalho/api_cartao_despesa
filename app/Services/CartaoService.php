@@ -11,18 +11,18 @@ use Illuminate\Support\Facades\Auth;
 
 class CartaoService
 {
-    public function listarCartoes(): Collection
+    public function listarCartoes(int $paginate): Collection
     {
         $user = Auth::user();
         if(!$user){
             throw new UserNaoEncontradoException();
         }
-        if($user->is_admin ?? false){
-            $cartoes = Cartao::all();
-        }else{
-            $cartoes = $user->cartoes;
+        if($user->is_admin){
+            $cartoes = Cartao::paginate($paginate);
+            return $cartoes->getCollection();
         }
-        return $cartoes;
+        $cartoes = $user->cartoes()->paginate($paginate);
+        return new Collection($cartoes>items());
     }
 
     public function cadastrarCartao(array $dados): Cartao
