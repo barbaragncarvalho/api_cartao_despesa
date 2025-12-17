@@ -4,14 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\ViewAllUsersRequest;
 use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
-use Nette\Schema\ValidationException;
 
 class UserController extends Controller
 {
@@ -24,10 +21,10 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(ViewAllUsersRequest $request)
     {
-        Gate::authorize('viewAny', User::class);
-        $users = User::with('cartoes')->get();
+        $paginate = $request->getPaginate();
+        $users = $this->userService->listarUsers($paginate);
         return response()->json($users, 200);
     }
 

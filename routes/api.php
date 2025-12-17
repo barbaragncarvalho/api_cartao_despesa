@@ -4,9 +4,6 @@ use App\Http\Controllers\CartaoController;
 use App\Http\Controllers\DespesaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Models\User;
-use App\Models\Cartao;
-use App\Models\Despesa;
 
 Route::post('/login', [UserController::class, 'login']);
 

@@ -38,7 +38,7 @@ class StoreUserRequest extends FormRequest
         ];
     }
 
-    public function returnados(): array
+    public function returndados(): array
     {
         return $this->validated();
     }

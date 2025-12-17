@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Exceptions\CredenciaisInvalidasException;
 use App\Exceptions\UserNaoEncontradoException;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +14,12 @@ use Nette\Schema\ValidationException;
 
 class UserService
 {
+    public function listarUsers(int $paginate): Collection
+    {
+        $users = User::with('cartoes')->paginate($paginate);
+        return $users->getCollection();
+    }
+
     public function cadastrarUser(array $dados): User
     {
         if(isset($dados['password'])){
