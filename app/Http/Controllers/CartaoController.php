@@ -21,13 +21,8 @@ class CartaoController extends Controller
 
     public function index()
     {
-        $user = Auth::user();
         Gate::authorize('viewAny', Cartao::class);
-        if($user->is_admin ?? false){
-            $cartoes = Cartao::all();
-        }else{
-            $cartoes = $user->cartoes;
-        }
+        $cartoes = $this->cartaoService->listarCartoes();
         return response()->json($cartoes, 200);
     }
 
@@ -36,66 +31,29 @@ class CartaoController extends Controller
      */
     public function store(StoreCartaoRequest $request)
     {
-        try {
-            $cartao = $this->cartaoService->cadastrarCartao($request->returnDados());
-            //Log::debug($cartao);
-            return response()->json($cartao, 201);
-        }catch(ModelNotFoundException $e){
-            return response()->json([
-                'message' => 'Usuário dono do cartão não encontrado!'
-            ], 404);
-        }catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
-        }
+        $cartao = $this->cartaoService->cadastrarCartao($request->returnDados());
+        return response()->json($cartao, 201);
     }
 
     public function show(string $id)
     {
-        try {
-            $cartao = Cartao::findOrFail($id);
-            Gate::authorize('view', $cartao);
-            return response()->json($cartao, 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Cartão não encontrado.'
-            ], 404);
-        }
+        $cartao = $this->cartaoService->listarUmCartao($id);
+        Gate::authorize('view', $cartao);
+        return response()->json($cartao, 200);
     }
 
     public function update(UpdateCartaoRequest $request, string $id)
     {
-        try {
-            $cartaoAtualizado = $this->cartaoService->atualizarCartao($id, $request->returnDados());
-            return response()->json($cartaoAtualizado, 200);
-        }catch(ModelNotFoundException $e){
-            return response()->json([
-                'message' => 'Cartão não encontrado.'
-            ], 404);
-        }catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Falha ao atualizar cartão: '.$e->getMessage()
-            ], 400);
-        }
+        $cartaoAtualizado = $this->cartaoService->atualizarCartao($id, $request->returnDados());
+        return response()->json($cartaoAtualizado, 200);
     }
 
 
     public function destroy(string $id)
     {
-        try {
-            $cartao = Cartao::findOrFail($id);
-            Gate::authorize('delete', $cartao);
-            $this->cartaoService->removerCartao($id);
-            return response()->json(null, 204);
-        }catch (ModelNotFoundException $e){
-            return response()->json([
-                'message'=> 'Cartão não encontrado para ser removido.'
-            ], 404);
-        }catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Falha ao remover cartão: '.$e->getMessage()
-            ], 400);
-        }
+        $cartao = $this->cartaoService->listarUmCartao($id);
+        Gate::authorize('delete', $cartao);
+        $this->cartaoService->removerCartao($id);
+        return response()->json(null, 204);
     }
 }

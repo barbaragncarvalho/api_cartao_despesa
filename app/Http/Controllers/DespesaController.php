@@ -17,9 +17,8 @@ class DespesaController extends Controller
 {
     public function index(DespesaService $despesaService)
     {
-        $user = Auth::user();
         Gate::authorize('viewAny', Despesa::class);
-        $despesas = $despesaService->listarDespesas($user);
+        $despesas = $despesaService->listarDespesas();
         return response()->json($despesas, 200);
     }
 

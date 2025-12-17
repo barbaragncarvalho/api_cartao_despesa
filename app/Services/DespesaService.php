@@ -10,6 +10,7 @@ use App\Mail\DespesaCriada;
 use App\Models\Cartao;
 use App\Models\Despesa;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -17,8 +18,9 @@ use function PHPUnit\Framework\throwException;
 
 class DespesaService
 {
-    public function listarDespesas(User $user)
+    public function listarDespesas(): Collection
     {
+        $user = Auth::user();
         if ($user->is_admin) {
             return Despesa::all();
         }
@@ -26,27 +28,31 @@ class DespesaService
     }
 
     public function cadastrarDespesa(array $dados, User $userLogado){
-        return DB::transaction(function () use ($dados, $userLogado) {
-            $consulta = Cartao::where('id', $dados['cartao_id']);
-            if(!$userLogado->is_admin){
-                $consulta->where('user_id',$userLogado->id);
-            }
-            $cartao = $consulta->first();
-            if (!$cartao) {
-                throw new CartaoInvalidoException();
-            }
-            if ($cartao->saldo < $dados['valor']) {
-                throw new SaldoInsuficienteException();
-            }
-            $despesa = Despesa::create($dados);
-            $cartao->saldo -= $dados['valor'];
-            $cartao->save();
-            $adminsEmails = User::where('is_admin', true)->pluck('email')->toArray();
-            $destinatarios = array_merge([$userLogado->email], $adminsEmails);
-            $despesaComCartao = $despesa->load('cartao');
-            Mail::to($destinatarios)->send(new DespesaCriada($despesaComCartao));
-            return $despesa;
-        });
+        try {
+            return DB::transaction(function () use ($dados, $userLogado) {
+                $consulta = Cartao::where('id', $dados['cartao_id']);
+                if (!$userLogado->is_admin) {
+                    $consulta->where('user_id', $userLogado->id);
+                }
+                $cartao = $consulta->first();
+                if (!$cartao) {
+                    throw new CartaoInvalidoException();
+                }
+                if ($cartao->saldo < $dados['valor']) {
+                    throw new SaldoInsuficienteException();
+                }
+                $despesa = Despesa::create($dados);
+                $cartao->saldo -= $dados['valor'];
+                $cartao->save();
+                $adminsEmails = User::where('is_admin', true)->pluck('email')->toArray();
+                $destinatarios = array_merge([$userLogado->email], $adminsEmails);
+                $despesaComCartao = $despesa->load('cartao');
+                Mail::to($destinatarios)->send(new DespesaCriada($despesaComCartao));
+                return $despesa;
+            });
+        }catch(\Exception $e){
+            throw new \Exception("Falha ao cadastrar despesa: ".$e->getMessage());
+        }
     }
 
     public function listarUmaDespesa(string $id): Despesa

@@ -39,7 +39,7 @@ class StoreCartaoRequest extends FormRequest
     public function messages():array
     {
         return [
-            'number.digits_betweer' => 'O número do cartão deve ter entre 16 dígitos e 19.',
+            'number.digits_between' => 'O número do cartão deve ter entre 16 dígitos e 19.',
             'cvv.size' => 'O CVV deve ter 3 dígitos.',
             'saldo.min' => 'O saldo do cartão não deve ser menor que 0.',
             'data_validade.date_format' => 'A data de validade deve ser no formato mm/yy.'
