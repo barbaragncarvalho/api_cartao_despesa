@@ -9,6 +9,6 @@ class SaldoInsuficienteException extends Exception
 {
     public function render($request): JsonResponse
     {
-        return response()->json(['error'=>'Operação negada', 'message'=> 'Voc~e não tem saldo suficente para realizar esta transação.'], 402);
+        return response()->json(['error'=>'Operação negada', 'message'=> 'Você não tem saldo suficente para realizar esta transação.'], 402);
     }
 }

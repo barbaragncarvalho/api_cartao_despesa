@@ -37,10 +37,19 @@ class CartaoControllerTest extends TestCase
             'is_admin' => false,
         ]);
         $cartaoUserLogado = Cartao::factory()->create(['user_id' => $userLogado->id]);
+        $outroUser = User::factory()->create();
+        $cartaoOutroUser = Cartao::factory()->create(['user_id' => $outroUser->id]);
+
         $response = $this->actingAs($userLogado)->getJson('api/cartoes');
+
         $response->assertJsonFragment([
-            'user_id' => $cartaoUserLogado->id
+            'id' => $cartaoUserLogado->id
         ]);
+
+        $response->assertJsonMissing([
+            'id' => $cartaoOutroUser->id
+        ]);
+        $response->assertStatus(200);
     }
 
     public function test_user_comum_nao_pode_editar_cartao()
@@ -51,8 +60,17 @@ class CartaoControllerTest extends TestCase
         $cartaoUserLogado = Cartao::factory()->create([
             'user_id' => $userLogado->id,
         ]);
-        $response = $this->actingAs($userLogado)->putJson('api/cartoes/'.$cartaoUserLogado->id);
-        $response->assertStatus(400);
+        $dadosAtualizados = [
+            'number' => '1234567890123456',
+            'data_validade' => '02/28',
+            'cvv' => '123',
+            'saldo' => 5690.01,
+            'user_id' => $userLogado->id,
+            'status' => 'ATIVO'
+        ];
+        $response = $this->actingAs($userLogado)->putJson('api/cartoes/'.$cartaoUserLogado->id,
+            $dadosAtualizados);
+        $response->assertStatus(403);
     }
 
     public function test_admin_pode_editar_cartao()
@@ -63,7 +81,18 @@ class CartaoControllerTest extends TestCase
         $cartaoUserLogado = Cartao::factory()->create([
             'user_id' => $userLogado->id,
         ]);
-        $response = $this->actingAs($userLogado)->putJson('api/cartoes/'.$cartaoUserLogado->id);
+
+        $dadosAtualizados = [
+            'number' => '1234567890123456',
+            'data_validade' => '02/28',
+            'cvv' => '123',
+            'saldo' => 5690.01,
+            'user_id' => $userLogado->id,
+            'status' => 'ATIVO'
+        ];
+        $response = $this->actingAs($userLogado)->putJson('api/cartoes/'.$cartaoUserLogado->id,
+        $dadosAtualizados);
+        //dd($response->getContent());
         $response->assertStatus(200);
     }
 
@@ -78,6 +107,6 @@ class CartaoControllerTest extends TestCase
         $user = User::factory()->create();
         $cartao = Cartao::factory()->create(['user_id' => $user->id]);
         $response = $this->actingAs($userLogado)->deleteJson('api/cartoes/'.$cartao->id);
-        $response->assertStatus(400);
+        $response->assertStatus(403);
     }
 }

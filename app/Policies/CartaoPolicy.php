@@ -38,10 +38,6 @@ class CartaoPolicy
      */
     public function update(User $user, Cartao $cartao): bool
     {
-        /*$isProprietario = $user->id === $cartao->user_id;
-
-
-        return $isProprietario;*/
         return false;
     }
 

@@ -22,7 +22,7 @@ class CartaoService
             return $cartoes->getCollection();
         }
         $cartoes = $user->cartoes()->paginate($paginate);
-        return new Collection($cartoes>items());
+        return new Collection($cartoes->items());
     }
 
     public function cadastrarCartao(array $dados): Cartao
