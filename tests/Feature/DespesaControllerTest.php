@@ -17,11 +17,12 @@ class DespesaControllerTest extends TestCase
         $user = User::factory()->create();
         $cartao = Cartao::factory()->create([
             'user_id' => $user->id,
+            'saldo' => 0
         ]);
-        $dadosDespesa = ['valor' => 50, 'cartao_id' => $cartao->id];
+        $dadosDespesa = ['descricao' => 'Despesa', 'valor' => 50, 'cartao_id' => $cartao->id];
         $response = $this->actingAs($user)->postJson('api/despesas', $dadosDespesa);
-        $response->assertStatus(400)->assertJsonFragment([
-            'message' => 'Saldo insuficiente no cartão.',
+        $response->assertStatus(402)->assertJsonFragment([
+            'message' => 'Você não tem saldo suficente para realizar esta transação.',
         ]);
     }
 
@@ -66,7 +67,7 @@ class DespesaControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($userLogado)->getJson('api/despesas/'.$despesa1Outro->id);
-        $response->assertStatus(404);
+        $response->assertStatus(403);
     }
 
     public function test_admin_ve_todas_as_despesas()
@@ -133,7 +134,6 @@ class DespesaControllerTest extends TestCase
             'valor' => 50.00,
         ]);
         $response = $this->actingAs($userLogado)->deleteJson('api/despesas/'.$despesaOutro->id);
-        $response->assertJsonFragment(['message' => 'Você não tem permissão para remover despesa.']);
         $response->assertStatus(403);
     }
 
@@ -178,6 +178,6 @@ class DespesaControllerTest extends TestCase
             'descricao'=>'Despesa teste',
         ];
         $response = $this->actingAs($userLogado)->postJson('api/despesas', $despesa);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 }

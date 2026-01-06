@@ -52,6 +52,8 @@ class DespesaService
                 Mail::to($destinatarios)->send(new DespesaCriada($despesaComCartao));
                 return $despesa;
             });
+        }catch(SaldoInsuficienteException | CartaoInvalidoException $e){
+            throw $e;
         }catch(\Exception $e){
             throw new \Exception("Falha ao cadastrar despesa: ".$e->getMessage());
         }
