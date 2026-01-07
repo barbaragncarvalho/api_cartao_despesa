@@ -77,7 +77,7 @@ class UserControllerTest extends TestCase
         $userLogado = User::factory()->create();
         $outroUser = User::factory()->create();
         $response = $this->actingAs($userLogado)->putJson('api/users/'.$outroUser->id);
-        $response->assertStatus(400);
+        $response->assertStatus(403);
     }
 
     public function test_admin_consegue_atualizar_outro_user()
@@ -106,7 +106,7 @@ class UserControllerTest extends TestCase
         ]);
         $outroUser = User::factory()->create();
         $response = $this->actingAs($userLogado)->deleteJson('api/users/'.$outroUser->id);
-        $response->assertStatus(400);
+        $response->assertStatus(403);
     }
 
     public function test_admin_consegue_remover_outro_user()
