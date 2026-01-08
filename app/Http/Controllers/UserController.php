@@ -33,6 +33,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $userRequest)
     {
+        Gate::authorize('create', User::class);
         $user = $this->userService->cadastrarUser($userRequest->returndados());
         return response()->json($user, 201);
     }

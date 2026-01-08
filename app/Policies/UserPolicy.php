@@ -35,7 +35,7 @@ class UserPolicy
      */
     public function create(User $userLogado): bool
     {
-        return true;
+        return false;
     }
 
     /**

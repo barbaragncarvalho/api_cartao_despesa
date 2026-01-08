@@ -13,7 +13,9 @@ class UserControllerTest extends TestCase
 
     public function test_cadastrar_user_admin()
     {
-        $userLogado = User::factory()->create();
+        $userLogado = User::factory()->create([
+            'is_admin' => true
+        ]);
         $dadosUser = [
             'name' => 'Ana',
             'email' => "ana@gmail.com",
@@ -25,7 +27,9 @@ class UserControllerTest extends TestCase
     }
 
     public function test_cadastrar_user_comum(){
-        $userLogado = User::factory()->create();
+        $userLogado = User::factory()->create([
+            'is_admin' => true
+        ]);
         $dadosUser = [
             'name' => 'Ana',
             'email' => "ana@gmail.com",
